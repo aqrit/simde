@@ -2909,21 +2909,18 @@ simde_mm_max_ss (simde__m128 a, simde__m128 b) {
     return simde_mm_move_ss(a, simde_mm_max_ps(a, b));
   #elif (SIMDE_NATURAL_VECTOR_SIZE > 0)
     return simde_mm_move_ss(a, simde_mm_max_ps(simde_x_mm_broadcastlow_ps(a), simde_x_mm_broadcastlow_ps(b)));
+  #elif defined(SIMDE_ARM_NEON_A32V7_NATIVE)
+    return simde_mm_move_ss(a, simde_mm_max_ps(simde_x_mm_broadcastlow_ps(a), simde_x_mm_broadcastlow_ps(b)));
   #else
     simde__m128_private
       r_,
       a_ = simde__m128_to_private(a),
       b_ = simde__m128_to_private(b);
 
-    #if defined(SIMDE_ARM_NEON_A32V7_NATIVE)
-      float32_t value = vgetq_lane_f32(maxq_f32(a_.neon_f32, b_.neon_f32), 0);
-      r_.neon_f32 = vsetq_lane_f32(value, a_.neon_f32, 0);
-    #else
       r_.f32[0] = (a_.f32[0] > b_.f32[0]) ? a_.f32[0] : b_.f32[0];
       r_.f32[1] = a_.f32[1];
       r_.f32[2] = a_.f32[2];
       r_.f32[3] = a_.f32[3];
-    #endif
 
     return simde__m128_from_private(r_);
   #endif
@@ -2974,6 +2971,8 @@ simde_mm_min_ps (simde__m128 a, simde__m128 b) {
 
     #if defined(SIMDE_FAST_NANS) && defined(SIMDE_ARM_NEON_A32V7_NATIVE)
       r_.neon_f32 = vminq_f32(a_.neon_f32, b_.neon_f32);
+    #elif defined(SIMDE_ARM_NEON_A32V7_NATIVE)
+      r_.neon_f32 = vbslq_f32(vcltq_f32(a_.neon_f32, b_.neon_f32), a_.neon_f32, b_.neon_f32);
     #elif defined(SIMDE_WASM_SIMD128_NATIVE)
       r_.wasm_v128 = wasm_f32x4_pmin(b_.wasm_v128, a_.wasm_v128);
     #elif defined(SIMDE_POWER_ALTIVEC_P6_NATIVE) || defined(SIMDE_ZARCH_ZVECTOR_14_NATIVE)
@@ -3043,21 +3042,18 @@ simde_mm_min_ss (simde__m128 a, simde__m128 b) {
     return simde_mm_move_ss(a, simde_mm_min_ps(a, b));
   #elif (SIMDE_NATURAL_VECTOR_SIZE > 0)
     return simde_mm_move_ss(a, simde_mm_min_ps(simde_x_mm_broadcastlow_ps(a), simde_x_mm_broadcastlow_ps(b)));
+  #elif defined(SIMDE_ARM_NEON_A32V7_NATIVE)
+    return simde_mm_move_ss(a, simde_mm_min_ps(simde_x_mm_broadcastlow_ps(a), simde_x_mm_broadcastlow_ps(b)));
   #else
     simde__m128_private
       r_,
       a_ = simde__m128_to_private(a),
       b_ = simde__m128_to_private(b);
 
-    #if defined(SIMDE_ARM_NEON_A32V7_NATIVE)
-      float32_t value = vgetq_lane_f32(vminq_f32(a_.neon_f32, b_.neon_f32), 0);
-      r_.neon_f32 = vsetq_lane_f32(value, a_.neon_f32, 0);
-    #else
       r_.f32[0] = (a_.f32[0] < b_.f32[0]) ? a_.f32[0] : b_.f32[0];
       r_.f32[1] = a_.f32[1];
       r_.f32[2] = a_.f32[2];
       r_.f32[3] = a_.f32[3];
-    #endif
 
     return simde__m128_from_private(r_);
   #endif
